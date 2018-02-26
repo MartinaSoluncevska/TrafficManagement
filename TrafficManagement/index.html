@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Traffic Management</title>
+    <link href="/Content/main.css" rel="stylesheet">
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap.yeti.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100%;
+        }
+    </style>
+</head>
+<body ng-app="app">
+
+    <div ng-view>
+
+        <nav class="navbar navbar-default">
+            <div class="container-fluid" style="background-color:dodgerblue">
+                <div>
+                    <p class="navbar-brand " style="text-align: center; width:100%; padding-top: 18px;">TRAFFIC MANAGEMENT</p>
+                </div>
+            </div>
+        </nav>
+
+        <form ng-controller="ctrlTrafficManagement as ctrl">
+            <fieldset class="col-lg-10 col-lg-offset-1">
+                <div class="container" style="width:98%; padding:30px; margin-top:-20px; background-color: lightblue">
+                    <div class="col-md-8" id="map" style="width:100%; height:400px; margin-top:-20px; overflow:visible;"></div>   
+                    <script type="text/javascript">
+                        var map;
+                        function initMap() {
+                            var directionsService = new google.maps.DirectionsService;
+                            var directionsDisplay, directionsDisplay2, Directionsdisplay3;
+
+                            //DirectionsDisplay instance for first route
+                            directionsDisplay = new google.maps.DirectionsRenderer({
+                                suppressMarkers: false,
+                                polylineOptions: {
+                                    strokeColor: "#00FF00",
+                                    strokeWeight: 8
+                                }
+                            });
+                            //DirectionsDisplay instance for second route
+                            directionsDisplay2 = new google.maps.DirectionsRenderer({
+                                suppressMarkers: false,
+                                polylineOptions: {
+                                    strokeColor: "#0000CD",
+                                    strokeWeight: 5
+                                }
+                            });
+
+                            //DirectionsDisplay instance for third route
+                            directionsDisplay3 = new google.maps.DirectionsRenderer({
+                                suppressMarkers: false,
+                                polylineOptions: {
+                                    strokeColor: "#FF0000",
+                                    strokeWeight: 2,
+                                    strokeOpacity: 2.0
+                                }
+                            });
+                            
+                            map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 15,
+                                center: { lat: 41.995546, lng: 21.438596}
+                            });
+                            //Attaching map object to DirectionsDisplay instances
+                            directionsDisplay.setMap(map);
+                            directionsDisplay2.setMap(map);
+                            directionsDisplay3.setMap(map);
+                            displayRoute(directionsService, directionsDisplay, directionsDisplay2, directionsDisplay3);
+                        }
+
+                        //Function for displaying routes using directionsDisplay objects for all three routes and directionsService object for calculating routes
+                        function displayRoute(directionsService, directionsDisplay, directionsDisplay2, directionsDisplay3) {
+                            //global variables for storing Latitudes and Longitudes we will get from the external JSON file
+                            var locationLats = [];
+                            var locationLong = [];
+                            myFunction(locationLats, locationLong);
+
+                            function myFunction(locationLats, locationLong) {
+                                $.getJSON("locations.txt", function (json1) {
+                                    $(json1).each(function (key, value) {
+                                        locationLats[key] = json1[key].lat;
+                                        locationLong[key] = json1[key].lng;
+                                        return locationLats;
+                                        return locationLong;
+                                    });
+
+                                    //define parameters for displaying first route
+                                    var requestOne = {
+                                        origin: new google.maps.LatLng(locationLats[0], locationLong[0]),
+                                        destination: new google.maps.LatLng(locationLats[5], locationLong[5]),
+                                        waypoints: [{ location: new google.maps.LatLng(locationLats[1], locationLong[1]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[2], locationLong[2]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[3], locationLong[3]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[4], locationLong[4]), stopover: false }],
+                                        optimizeWaypoints: true,
+                                        travelMode: google.maps.DirectionsTravelMode.WALKING
+                                    };
+
+                                    //send parameters from request variable to the response
+                                    directionsService.route(requestOne, function (response, status) {
+                                        if (status == google.maps.DirectionsStatus.OK) {
+                                            directionsDisplay.setDirections(response);
+                                        }
+                                        else {
+                                            //handle error
+                                        }
+                                    });
+
+                                    //define parameters for displaying second route
+                                    var requestTwo = {
+                                        origin: new google.maps.LatLng(locationLats[0], locationLong[0]),
+                                        destination: new google.maps.LatLng(locationLats[5], locationLong[5]),
+                                        waypoints: [{ location: new google.maps.LatLng(locationLats[1], locationLong[1]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[2], locationLong[2]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[6], locationLong[6]), stopover: false }],
+                                        optimizeWaypoints: true,
+                                        travelMode: google.maps.DirectionsTravelMode.WALKING
+                                    };
+
+                                    //send parameters from request variable to the response
+                                    directionsService.route(requestTwo, function (response, status) {
+                                        if (status == google.maps.DirectionsStatus.OK) {
+                                            directionsDisplay2.setDirections(response);
+                                        }
+                                        else {
+                                            //handle error
+                                        }
+                                    });
+
+                                    //define parameters for displaying third route
+                                    var requestThree = {
+                                        origin: new google.maps.LatLng(locationLats[0], locationLong[0]),
+                                        destination: new google.maps.LatLng(locationLats[5], locationLong[5]),
+                                        waypoints: [{ location: new google.maps.LatLng(locationLats[1], locationLong[1]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[8], locationLong[8]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[7], locationLong[7]), stopover: false },
+                                                    { location: new google.maps.LatLng(locationLats[6], locationLong[6]), stopover: false }],
+                                        optimizeWaypoints: true,
+                                        travelMode: google.maps.DirectionsTravelMode.WALKING
+                                    };
+
+                                    //send parameters from request variable to the response
+                                    directionsService.route(requestThree, function (response, status) {
+                                        if (status == google.maps.DirectionsStatus.OK) {
+                                            directionsDisplay3.setDirections(response);
+                                        }
+                                        else {
+                                            //handle error
+                                        }
+                                    });
+                                });
+                            };           
+                        }                       
+                    </script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCw1SPkVPKgxLk5S1YPXV0OWixW90OilZ8&callback=initMap"
+                            async defer></script>
+
+                    <div class="col-md-6" style="padding-top:20px;">
+                        <div class="form-group row">
+                            <label class="col-sm-3 control-label">
+                                <strong>Изберете почетна дестинација:</strong>
+                            </label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="documentTypeInput"
+                                        ng-model="ctrl.selectedIdStart"
+                                        ng-options="option.Id_Start for option in ctrl.routeStarts track by option.Id_Start"
+                                       >
+                                    <!--<option value="{{option.Id_Start}}">{{option.Id_Start}}</option>-->
+                                    <option id="documentTypeInputStart" value="{{option.Id_Start}}">{{option.Id_Start}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 control-label">
+                                <strong>Изберете крајна дестинација:</strong>
+                            </label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="documentTypeInput"
+                                        ng-model="ctrl.selectedIdEnd"
+                                        ng-options="option.Id_End for option in ctrl.routeEnds track by option.Id_End"
+                                        >
+                                    <option id="documentTypeInputEnd" value="{{option.Id_End}}">{{option.Id_End}}</option>
+                                    <option></option>
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="float:left; padding:30px 100px; text-align:center;">
+                        <!--<div style="margin:70px 100px 50px 50px">-->
+                            <button type="button" style="width: 100px;"  class="btn btn-success" ng-click="ctrl.calculateRoute(ctrl.selectedIdStart.Id_Start,ctrl.selectedIdEnd.Id_End)">Пресметај</button>
+                       <!-- </div> -->
+                    </div>
+                    <div class="col-md-8" style="width:100%; margin-top:-15px; float:left;">
+                        <p style="width:100%; text-align:center;">Најприкладна рута е: {{ctrl.route.Name}} со почеток во точка {{ctrl.route.Id_Start}} и крај во точка {{ctrl.route.Id_End}} </p>
+                       
+                        <img src="tm.png" style="width:100%; padding-top:30px; margin:0 auto;">
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+       
+
+
+       
+    </div>
+
+
+    <!--external libraries-->
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular-route.min.js"></script>
+    <script src="scripts/jQuery/jquery-3.1.0.min.js"></script>
+    <script src="scripts/angular/angular-animate.min.js"></script>
+    <script src="scripts/angular/angular-sanitize.min.js"></script>
+    <script src="scripts/angular/angular-translate.min.js"></script>
+    <script src="Scripts/angular/smart-table.min.js"></script>
+    <script src="Scripts/angular/angular-cookies.min.js"></script>
+    <script src="scripts/bootstrap/bootstrap.min.js"></script>
+    <script src="scripts/angular/angular-image-compress.js"></script>
+    <!--modules-->
+    <script src="app/app.module.js"></script>
+    <script src="app/shared/shared.module.js"></script>
+    <!--services-->
+    <script src="app/shared/repository.service.js"></script>
+    <script src="app/shared/web.service.js"></script>
+    <script src="app/shared/app.config.js"></script>
+    <!--controllers-->
+    <script src="app/controllers/ctrlTrafficManagement.js"></script>
+    <!--jQuery-->
+    <script>
+        $(document).on('click', '.navbar-collapse.in', function (e) {
+            if ($(e.target).is('a')) {
+                $(this).collapse('hide');
+            }
+        });
+    </script>
+
+</body>
+</html>
